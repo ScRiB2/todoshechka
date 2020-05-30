@@ -1,0 +1,14 @@
+.h1 {
+    padding-top: 10px;
+    margin-bottom: 20px;
+    color: #facf5a;
+    text-align: center;
+    font-size: 50px;
+    font-weight: 800;
+}
+
+.todo {
+    color: #455d7a;
+    text-align: center;
+    font-size: 20px;
+}

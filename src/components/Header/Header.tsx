@@ -4,6 +4,7 @@ import {UserData} from "../../store/auth/types";
 import {logout} from "../../store/auth/actions";
 import {connect, ConnectedProps} from "react-redux";
 import {RootState} from "../../store/index";
+import {Link, Redirect} from "react-router-dom";
 
 interface IProps {
     user: UserData
@@ -32,10 +33,16 @@ const Header = (props: Props) => (
     <header className={css.header}>
         <div className={['container', css["header-container"]].join(' ')}>
             <div className={css.left}>
-                TodoList
+                <Link to='/todos'>Todo List</Link>
             </div>
 
+
             <div className={css.right}>
+                {
+                    props.user.role == 'admin' && <div>
+                        <Link to={'/users'}>Users</Link>
+                    </div>
+                }
                 <div className={css.username}>
                     {props.user.name}
                 </div>

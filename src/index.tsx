@@ -24,9 +24,9 @@ export const customHistory = createBrowserHistory();
 
 render(
     <Provider store={store}>
-        <Router history={customHistory}>
+        <BrowserRouter>
             <App/>
-        </Router>
+        </BrowserRouter>
     </Provider>,
     document.getElementById('app')
 );

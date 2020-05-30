@@ -2,14 +2,15 @@ import * as React from "react";
 import * as css from "./Login.css"
 // @ts-ignore
 import {Field, Form} from 'react-final-form'
-import {auth} from "../../store/auth/actions";
+import {login} from "../../store/auth/actions";
 import {connect, ConnectedProps} from "react-redux";
 import {UserAuthData} from "../../store/auth/types";
 import {RootState} from "../../store/index";
-import {customHistory} from "../../index";
 import {siteKey} from "../../env/env";
 // @ts-ignore
 import ReCAPTCHA from 'react-google-recaptcha'
+import {ErrorHandler} from "../../components/ErrorHandler/ErrorHandler";
+import {getError} from "../../store/selectors";
 
 
 interface IState {
@@ -19,12 +20,12 @@ interface IState {
 
 
 const mapState = (state: RootState) => ({
-    authError: state.auth.error
+    authError: getError(state)
 });
 
 
 const mapDispatch = {
-    auth: (authData: UserAuthData) => auth(authData)
+    login: (authData: UserAuthData) => login(authData)
 };
 
 const connector = connect(mapState, mapDispatch);
@@ -35,20 +36,24 @@ type Props = PropsFromRedux;
 
 
 class Login extends React.Component<Props, IState> {
+    isUnmount = false;
     state: IState = {
         isAppealToApi: false,
-        recaptchaValue: null
+        recaptchaValue: '1'
     };
 
     onClick = async (data: UserAuthData) => {
         if (this.state.recaptchaValue) {
             this.setState({isAppealToApi: true});
-            await this.props.auth(data);
-            this.setState({isAppealToApi: false});
-            if (!this.props.authError)
-                customHistory.push('/')
+            await this.props.login(data);
+            if (!this.isUnmount)
+                this.setState({isAppealToApi: false})
         }
     };
+
+    componentWillUnmount(): void {
+        this.isUnmount = true
+    }
 
     validateForm = (values: UserAuthData) => {
         const errors: UserAuthData = {} as UserAuthData;
@@ -80,10 +85,9 @@ class Login extends React.Component<Props, IState> {
                             <form id='loginForm' onSubmit={handleSubmit}>
                                 {
                                     this.props.authError
-                                        ? <div className="alert alert-danger" role="alert">
-                                            {this.props.authError}
-                                        </div>
-                                        : null}
+                                        ? <ErrorHandler errorText={this.props.authError}/>
+                                        : null
+                                }
                                 <Field name="login">
                                     {({input, meta}) => (
                                         <div className="form-group">

@@ -5,7 +5,7 @@ export interface UserAuthData {
 
 export interface UserData {
     name: string
-    role: string
+    role: 'admin' | 'user'
 }
 
 export interface UserState {

@@ -13,6 +13,16 @@ export interface UserState {
     error: string
 }
 
+export interface TodoReqData {
+    title: string
+    description: string
+}
+
+export interface TodoData extends TodoReqData{
+    id: number
+    createdBy: string
+}
+
 export const LOGIN_SUCCESS = 'LOGIN_SUCCESS';
 export const LOGIN_ERROR = 'LOGIN_ERROR';
 export const LOGOUT = 'LOGOUT';

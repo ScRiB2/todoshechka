@@ -3,20 +3,15 @@ import {API} from "../../API/index";
 import * as css from "./TodoList.css";
 import {Loader} from "../../components/Loader/Loader";
 import {Modal} from "../../components/Modal/Modal";
-import {ErrorHandler} from "../../components/ErrorHandler/ErrorHandler";
 // @ts-ignore
 import {Field, Form} from "react-final-form";
-import {siteKey} from "../../env/env";
-
-interface Todo {
-    id: number
-    title: string
-    description: string
-    createdBy: string
-}
+import {TodoData, TodoReqData} from "../../store/auth/types";
+import {ErrorHandler} from "../../components/ErrorHandler/ErrorHandler";
 
 interface IState {
-    todos: Todo[]
+    todos: TodoData[]
+    isAppealToApi: boolean
+    error: string
     showLoader: boolean
     showModal: boolean
 }
@@ -24,16 +19,20 @@ interface IState {
 export default class TodoList extends React.Component<any, IState> {
     state: IState = {
         todos: null,
+        isAppealToApi: false,
+        error: null,
         showLoader: true,
         showModal: false
     };
 
     componentDidMount(): void {
-        API.getTodos()
-            .then(res => {
-                this.setState({showLoader: false, todos: res.data})
-            })
+        this.updateTodos()
     }
+
+    updateTodos = () => API.getTodos().then(res => {
+        this.setState({showLoader: false, todos: res.data})
+    });
+
 
     renderTbody = () => {
         return this.state.todos.map((todo, index) => (
@@ -43,12 +42,39 @@ export default class TodoList extends React.Component<any, IState> {
                 <td>{todo.description}</td>
                 <td>{todo.createdBy}</td>
                 <td>
-                    <button type="button" className="btn btn-dark pull-right">E</button>
-                    <button type="button" className="btn btn-dark pull-right">D</button>
+                    <button type="button" className="btn btn-dark">E</button>
+                    <button type="button" className="btn btn-dark">D</button>
                 </td>
             </tr>
         ))
     };
+
+
+    onCreateTodo = (data: TodoReqData) => {
+        this.setState({isAppealToApi: true});
+        API.postTodo(data)
+            .then(res => {
+                this.setState({isAppealToApi: false});
+                if (res.status == 400) {
+                    return this.setState({error: res.data.message})
+                }
+                this.updateTodos()
+                    .then(() => this.setState({showModal: false}))
+            })
+    };
+
+    validateForm = (values: TodoReqData) => {
+        const errors: TodoReqData = {} as TodoReqData;
+        if (!values.title) {
+            errors.title = 'Required'
+        }
+        if (!values.description) {
+            errors.description = 'Required'
+        }
+
+        return errors
+    };
+
 
     render() {
         return (
@@ -72,7 +98,9 @@ export default class TodoList extends React.Component<any, IState> {
                             </tbody>
                         </table>
                         <button type="button" className="btn btn-dark pull-right"
-                                onClick={() => this.setState({showModal: true})}>Create new Todo
+                                onClick={() => this.setState({showModal: true})}
+                        >
+                            Create new Todo
                         </button>
                     </div>
                     {
@@ -80,58 +108,57 @@ export default class TodoList extends React.Component<any, IState> {
                         && <Modal
                             header='Create ToDo'
                             toggleShowModal={() => this.setState({showModal: false})}
-                            body={(
-                                <Form
-                                    // onSubmit={this.onClick}
-                                    // validate={this.validateForm}
-                                    render={({handleSubmit}) => (
-                                        <form id='loginForm' onSubmit={handleSubmit}>
-                                            {
-                                                this.props.authError
-                                                    ? <ErrorHandler errorText={this.props.authError}/>
-                                                    : null
-                                            }
-                                            <Field name="login">
-                                                {({input, meta}) => (
-                                                    <div className="form-group">
-                                                        <label htmlFor="inputUsername">Login</label>
-                                                        <input type="text"
-                                                               className={["form-control", meta.error && meta.touched && css["is-not-login"]].join(' ')}
-                                                               id="inputUsername" {...input}
-                                                               placeholder="Enter username" required/>
-                                                        {meta.error && meta.touched && <div>
-                                                            {meta.error}
-                                                        </div>}
+                            body={<Form
+                                onSubmit={this.onCreateTodo}
+                                validate={this.validateForm}
+                                render={({handleSubmit}) => (
+                                    <form id='todoForm' onSubmit={handleSubmit}>
+                                        {
+                                            this.state.error
+                                                ? <ErrorHandler errorText={this.state.error}/>
+                                                : null
+                                        }
+                                        <Field name="title">
+                                            {({input, meta}) => (
+                                                <div className="form-group">
+                                                    <label htmlFor="inputTitle">Title</label>
+                                                    <input type="text"
+                                                           className={["form-control", meta.error && meta.touched && css["is-not-create"]].join(' ')}
+                                                           id="inputTitle" {...input}
+                                                           placeholder="Enter title" required/>
+                                                    {meta.error && meta.touched &&
+                                                    <div className={css.invalid}>
+                                                        {meta.error}
+                                                    </div>}
 
-                                                    </div>
-                                                )}
-                                            </Field>
+                                                </div>
+                                            )}
+                                        </Field>
 
-                                            <Field name="password">
-                                                {({input, meta}) => (
-                                                    <div className="form-group">
-                                                        <label htmlFor="inputPassword">Password</label>
-                                                        <input type="password"
-                                                               className={["form-control", meta.error && meta.touched && css["is-not-login"]].join(' ')}
-                                                               id="inputPassword" {...input}
-                                                               placeholder="Password" required/>
-                                                        {meta.error && meta.touched && <div >
-                                                            {meta.error}
-                                                        </div>}
-                                                    </div>
-                                                )}
-                                            </Field>
-                                        </form>
-                                    )}
-                                />
-                            )}
-                            footer={(
-                                <button type="submit"
-                                        className="btn btn-primary pull-right mt-3"
-                                >
-                                    {'Sign in'}
-                                </button>
-                            )}
+                                        <Field name="description">
+                                            {({input, meta}) => (
+                                                <div className="form-group">
+                                                    <label htmlFor="inputDescription">Description</label>
+                                                    <input type="text"
+                                                           className={["form-control", meta.error && meta.touched && css["is-not-create"]].join(' ')}
+                                                           id="inputDescription" {...input}
+                                                           placeholder="Description" required/>
+                                                    {meta.error && meta.touched &&
+                                                    <div className={css.invalid}>
+                                                        {meta.error}
+                                                    </div>}
+                                                </div>
+                                            )}
+                                        </Field>
+                                        <button type="submit" disabled={this.state.isAppealToApi}
+                                                className="btn btn-primary pull-right mt-3"
+                                        >
+                                            {this.state.isAppealToApi ? 'Create...' : 'Create'}
+                                        </button>
+                                    </form>
+                                )}
+                            />
+                            }
                         />}
                 </>
         )

@@ -2,37 +2,84 @@ import * as React from "react";
 import {API} from "../../API/index";
 import * as css from "./TodoList.css";
 import {Loader} from "../../components/Loader/Loader";
-import {Modal} from "../../components/Modal/Modal";
 // @ts-ignore
-import {Field, Form} from "react-final-form";
 import {TodoData, TodoReqData} from "../../store/auth/types";
-import {ErrorHandler} from "../../components/ErrorHandler/ErrorHandler";
+import TodoModal from "./components/TodoModal";
+import {RootState} from "../../store/index";
+import {getUser} from "../../store/selectors";
+import {connect, ConnectedProps} from "react-redux";
 
 interface IState {
     todos: TodoData[]
     isAppealToApi: boolean
     error: string
+    editModal: {
+        show: boolean
+        id: number
+        title: string
+        description: string
+    }
     showLoader: boolean
-    showModal: boolean
+    showCreationModal: boolean
+    showEditModal: boolean
 }
 
-export default class TodoList extends React.Component<any, IState> {
+const mapState = (state: RootState) => ({
+    user: getUser(state)
+});
+
+
+const connector = connect(mapState);
+
+type PropsFromRedux = ConnectedProps<typeof connector>
+
+type Props = PropsFromRedux;
+
+
+class TodoList extends React.Component<Props, IState> {
     state: IState = {
         todos: null,
         isAppealToApi: false,
         error: null,
+        editModal: {
+            show: false,
+            id: null,
+            title: null,
+            description: null
+        },
         showLoader: true,
-        showModal: false
+        showCreationModal: false,
+        showEditModal: false
     };
 
     componentDidMount(): void {
         this.updateTodos()
     }
 
-    updateTodos = () => API.getTodos().then(res => {
-        this.setState({showLoader: false, todos: res.data})
-    });
+    updateTodos = () => {
+        this.setState({showLoader: true});
+        return API.getTodos().then(res => {
+            this.setState({showLoader: false, todos: res.data})
+        });
+    };
 
+    deleteTodo = (id: number) => {
+        API.deleteTodo(id)
+            .then(res => {
+                if (res.status == 204)
+                    this.updateTodos()
+            })
+    };
+
+
+    editTodo = (id: number, title: string, description: string) => {
+        this.setState({
+            editModal: {
+                show: true,
+                id, title, description
+            }
+        })
+    };
 
     renderTbody = () => {
         return this.state.todos.map((todo, index) => (
@@ -41,25 +88,57 @@ export default class TodoList extends React.Component<any, IState> {
                 <td>{todo.title}</td>
                 <td>{todo.description}</td>
                 <td>{todo.createdBy}</td>
-                <td>
-                    <button type="button" className="btn btn-dark">E</button>
-                    <button type="button" className="btn btn-dark">D</button>
+                <td>{
+                    this.props.user.role == 'admin' || todo.createdBy == this.props.user.role
+                        ? <>
+                            <button type="button" className="btn btn-dark"
+                                    onClick={() => this.editTodo(todo.id, todo.title, todo.description)}>
+                                <i className="fa fa-pencil" aria-hidden="true"/>
+                            </button>
+                            < button type="button" className="btn btn-dark" onClick={() => this.deleteTodo(todo.id)}>
+                                <i className="fa fa-trash-o" aria-hidden="true"/>
+                            </button>
+                        </>
+                        : null
+                }
                 </td>
             </tr>
         ))
     };
 
+    checkTodo = (res: any) => {
+        this.setState({isAppealToApi: false});
+        if (res.status == 400) {
+            this.setState({error: res.data.message});
+            return false
+        }
+        if (res.status == 500) {
+            this.setState({error: res.statusText});
+            return false
+        }
+        this.setState({error: null});
+        return true
+    };
 
     onCreateTodo = (data: TodoReqData) => {
         this.setState({isAppealToApi: true});
         API.postTodo(data)
             .then(res => {
-                this.setState({isAppealToApi: false});
-                if (res.status == 400) {
-                    return this.setState({error: res.data.message})
-                }
+                const flag = this.checkTodo(res);
+                if (flag)
                 this.updateTodos()
-                    .then(() => this.setState({showModal: false}))
+                    .then(() => this.toggleShowCreationModal())
+            })
+    };
+
+    onEditTodo = (data: TodoReqData) => {
+        this.setState({isAppealToApi: true});
+        API.putTodo(this.state.editModal.id, data)
+            .then(res => {
+                const flag = this.checkTodo(res);
+                if (flag)
+                this.updateTodos()
+                    .then(() => this.toggleShowEditModal())
             })
     };
 
@@ -74,6 +153,14 @@ export default class TodoList extends React.Component<any, IState> {
 
         return errors
     };
+
+    toggleShowCreationModal = () => this.setState(prevState => ({showCreationModal: !prevState.showCreationModal}));
+    toggleShowEditModal = () => this.setState(prevState => ({
+        editModal: {
+            ...prevState.editModal,
+            show: !prevState.editModal.show
+        }
+    }));
 
 
     render() {
@@ -98,69 +185,40 @@ export default class TodoList extends React.Component<any, IState> {
                             </tbody>
                         </table>
                         <button type="button" className="btn btn-dark pull-right"
-                                onClick={() => this.setState({showModal: true})}
+                                onClick={this.toggleShowCreationModal}
                         >
                             Create new Todo
                         </button>
                     </div>
                     {
-                        this.state.showModal
-                        && <Modal
-                            header='Create ToDo'
-                            toggleShowModal={() => this.setState({showModal: false})}
-                            body={<Form
-                                onSubmit={this.onCreateTodo}
-                                validate={this.validateForm}
-                                render={({handleSubmit}) => (
-                                    <form id='todoForm' onSubmit={handleSubmit}>
-                                        {
-                                            this.state.error
-                                                ? <ErrorHandler errorText={this.state.error}/>
-                                                : null
-                                        }
-                                        <Field name="title">
-                                            {({input, meta}) => (
-                                                <div className="form-group">
-                                                    <label htmlFor="inputTitle">Title</label>
-                                                    <input type="text"
-                                                           className={["form-control", meta.error && meta.touched && css["is-not-create"]].join(' ')}
-                                                           id="inputTitle" {...input}
-                                                           placeholder="Enter title" required/>
-                                                    {meta.error && meta.touched &&
-                                                    <div className={css.invalid}>
-                                                        {meta.error}
-                                                    </div>}
-
-                                                </div>
-                                            )}
-                                        </Field>
-
-                                        <Field name="description">
-                                            {({input, meta}) => (
-                                                <div className="form-group">
-                                                    <label htmlFor="inputDescription">Description</label>
-                                                    <input type="text"
-                                                           className={["form-control", meta.error && meta.touched && css["is-not-create"]].join(' ')}
-                                                           id="inputDescription" {...input}
-                                                           placeholder="Description" required/>
-                                                    {meta.error && meta.touched &&
-                                                    <div className={css.invalid}>
-                                                        {meta.error}
-                                                    </div>}
-                                                </div>
-                                            )}
-                                        </Field>
-                                        <button type="submit" disabled={this.state.isAppealToApi}
-                                                className="btn btn-primary pull-right mt-3"
-                                        >
-                                            {this.state.isAppealToApi ? 'Create...' : 'Create'}
-                                        </button>
-                                    </form>
-                                )}
-                            />
-                            }
-                        />}
+                        this.state.showCreationModal
+                        && <TodoModal
+                            header='Create Todo'
+                            buttonName='Create'
+                            isAppealToApi={this.state.isAppealToApi}
+                            error={this.state.error}
+                            toggleShowModal={this.toggleShowCreationModal}
+                            validate={this.validateForm}
+                            onSubmit={this.onCreateTodo}
+                        />
+                    }
+                    {
+                        this.state.editModal.show
+                        && <TodoModal
+                            header='Edit Todo'
+                            buttonName='Save'
+                            title={this.state.editModal.title}
+                            description={this.state.editModal.description}
+                            isAppealToApi={this.state.isAppealToApi}
+                            error={this.state.error}
+                            toggleShowModal={this.toggleShowEditModal}
+                            validate={this.validateForm}
+                            onSubmit={this.onEditTodo}
+                        />
+                    }
                 </>
         )
     }
 }
+
+export default connector(TodoList)

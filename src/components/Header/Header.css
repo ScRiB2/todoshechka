@@ -1,9 +1,14 @@
 .header {
     position: relative;
     height: 64px;
-    background-color: #ffffff;
+    background-color: #2b3137;
     box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+}
+
+.header a {
+    color: #4379bb;
+    font-weight: 800;
 }
 
 .header-container {
@@ -34,6 +39,7 @@
 .header .username {
     position: relative;
     padding: 0 14px;
+    color: #facf5a;
     display: flex;
     flex-direction: row;
     justify-content: center;

@@ -33,14 +33,14 @@ const Header = (props: Props) => (
     <header className={css.header}>
         <div className={['container', css["header-container"]].join(' ')}>
             <div className={css.left}>
-                <Link to='/todos'>Todo List</Link>
+                <Link to='/todos' style={{textDecoration: 'none'}}>Todo List</Link>
             </div>
 
 
             <div className={css.right}>
                 {
                     props.user.role == 'admin' && <div>
-                        <Link to={'/users'}>Users</Link>
+                        <Link to={'/users'} style={{textDecoration: 'none'}}>Users</Link>
                     </div>
                 }
                 <div className={css.username}>

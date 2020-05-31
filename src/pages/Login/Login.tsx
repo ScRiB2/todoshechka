@@ -9,6 +9,8 @@ import {siteKey} from "../../env/env";
 import ReCAPTCHA from 'react-google-recaptcha'
 import {MiniErrorHandler} from "../../components/MiniErrorHandler/MiniErrorHandler";
 import {getError} from "../../store/selectors";
+import i18next from "i18next";
+import {i18Keys} from "../../i18n";
 
 
 interface IState {
@@ -56,10 +58,10 @@ class Login extends React.Component<Props, IState> {
     validateForm = (values: UserAuthData) => {
         const errors: UserAuthData = {} as UserAuthData;
         if (!values.login) {
-            errors.login = 'Required'
+            errors.login = i18next.t(i18Keys.required)
         }
         if (!values.password) {
-            errors.password = 'Required'
+            errors.password = i18next.t(i18Keys.required)
         }
 
         return errors
@@ -74,7 +76,7 @@ class Login extends React.Component<Props, IState> {
             <div className={css["login-container"]}>
                 <div className={[css.login, 'col-sm-6', 'col-lg-4', 'p-4'].join(' ')}>
                     <div className={css.title}>
-                        Sign in Todoshechka
+                        {i18next.t(i18next.t(i18Keys.signIn))} Todoshechka
                     </div>
                     <Form
                         onSubmit={this.onClick}
@@ -89,11 +91,11 @@ class Login extends React.Component<Props, IState> {
                                 <Field name="login">
                                     {({input, meta}) => (
                                         <div className="form-group">
-                                            <label htmlFor="inputUsername">Login</label>
+                                            <label htmlFor="inputUsername">{i18next.t(i18Keys.login)}</label>
                                             <input type="text"
                                                    className={["form-control", meta.error && meta.touched && css["is-not-login"]].join(' ')}
                                                    id="inputUsername" {...input}
-                                                   placeholder="Enter username" required/>
+                                                   placeholder={i18next.t(i18Keys.enterLogin)} required/>
                                             {meta.error && meta.touched && <div className={css.invalid}>
                                                 {meta.error}
                                             </div>}
@@ -105,11 +107,11 @@ class Login extends React.Component<Props, IState> {
                                 <Field name="password">
                                     {({input, meta}) => (
                                         <div className="form-group">
-                                            <label htmlFor="inputPassword">Password</label>
+                                            <label htmlFor="inputPassword">{i18next.t(i18Keys.password)}</label>
                                             <input type="password"
                                                    className={["form-control", meta.error && meta.touched && css["is-not-login"]].join(' ')}
                                                    id="inputPassword" {...input}
-                                                   placeholder="Password" required/>
+                                                   placeholder={i18next.t(i18Keys.password)} required/>
                                             {meta.error && meta.touched && <div className={css.invalid}>
                                                 {meta.error}
                                             </div>}
@@ -126,7 +128,7 @@ class Login extends React.Component<Props, IState> {
                                 <button type="submit" disabled={this.state.isAppealToApi}
                                         className="btn btn-primary pull-right mt-3"
                                 >
-                                    {!this.state.isAppealToApi ? 'Sign in' : 'Signing in...'}
+                                    {!this.state.isAppealToApi ? i18next.t(i18Keys.signIn) : `${i18next.t(i18Keys.signIn)}...`}
                                 </button>
                             </form>
                         )}

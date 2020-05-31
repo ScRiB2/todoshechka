@@ -16,6 +16,8 @@ import Users from "./Users/Users";
 import {Whistle} from "../components/Whistle/Whistle";
 import {NotificationContainer} from 'react-notifications';
 import LoaderWithError from "../components/LoaderWithError/LoaderWithError";
+import i18next from "i18next";
+import {i18Keys} from "../i18n";
 
 interface IState {
     showLoader: boolean
@@ -59,7 +61,7 @@ class App extends React.Component<Props, IState> {
                         <>
                             {
                                 this.props.user
-                                    ? <Header user={this.props.user}/>
+                                    ? <Header user={this.props.user} update={() => this.forceUpdate()}/>
                                     : null
                             }
                             <Container style={{minHeight: !this.props.user ? '100vh' : 'calc(100vh - 64px)'}}>
@@ -92,8 +94,8 @@ class App extends React.Component<Props, IState> {
                                                                          <ErrorBoundary>
                                                                              <Users/>
                                                                          </ErrorBoundary>}/>
-                                                       <Route component={() => <Whistle errorNumber={403}
-                                                                                        errorText='Sorry, page not found'/>}/>
+                                                       <Route component={() => <Whistle errorNumber={404}
+                                                                                        errorText={i18next.t(i18Keys.notFoundPage)}/>}/>
                                                    </Switch>;
                                                } else {
                                                    return <Redirect to="/login"/>;

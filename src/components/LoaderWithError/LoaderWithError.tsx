@@ -13,7 +13,7 @@ const LoaderWithError: React.FC<IProps> = props => (
             props.showLoader
                 ? <Loader/>
                 : props.error
-                    ? <BigErrorHandler errorText={this.state.error}/>
+                    ? <BigErrorHandler errorText={props.error}/>
                     : props.children
         }
     </>

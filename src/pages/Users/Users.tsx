@@ -4,6 +4,8 @@ import {UserData} from "../../store/auth/types";
 import * as css from './Users.css'
 import {APIErrorHandler, ResultStatusType} from "../../API/utils";
 import LoaderWithError from "../../components/LoaderWithError/LoaderWithError";
+import i18next from "i18next";
+import {i18Keys} from "../../i18n";
 
 interface User extends UserData {
     login: string
@@ -23,6 +25,7 @@ export default class Users extends React.Component<any, IState> {
     };
 
     componentDidMount(): void {
+        i18next.changeLanguage('ru-RU')
         this.toggleShowLoader();
         API.getUsers()
             .then(res => {
@@ -41,7 +44,7 @@ export default class Users extends React.Component<any, IState> {
         if (this.state.users.length == 0)
             return (
                 <tr className={css.user}>
-                    <td colSpan={5}>Not found...</td>
+                    <td colSpan={5}>{i18next.t(i18Keys.notFound)}...</td>
                 </tr>
             );
         return this.state.users.map((user, index) => (
@@ -58,14 +61,14 @@ export default class Users extends React.Component<any, IState> {
         return (
             <LoaderWithError showLoader={this.state.showLoader} error={this.state.error}>
                 <div>
-                    <h1 className={css.h1}>List of User</h1>
+                    <h1 className={css.h1}>{i18next.t(i18Keys.listOfUser)}</h1>
                     <table className='table'>
                         <thead>
                         <tr className={css.user} style={{color: 'white'}}>
                             <th scope="col">#</th>
-                            <th scope="col">Login</th>
-                            <th scope="col">Username</th>
-                            <th scope="col">Role</th>
+                            <th scope="col">{i18next.t(i18Keys.login)}</th>
+                            <th scope="col">{i18next.t(i18Keys.username)}</th>
+                            <th scope="col">{i18next.t(i18Keys.role)}</th>
                         </tr>
                         </thead>
                         <tbody>

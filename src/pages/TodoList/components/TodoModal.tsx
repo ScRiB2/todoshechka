@@ -4,6 +4,8 @@ import * as css from "../TodoList.css";
 import {Modal} from "../../../components/Modal/Modal";
 import * as React from "react";
 import {TodoReqData} from "../../../store/auth/types";
+import i18next from "i18next";
+import {i18Keys} from "../../../i18n";
 
 interface IProps {
     header: string
@@ -39,11 +41,11 @@ export const TodoModal = (props: IProps) => (
                     <Field name="title">
                         {({input, meta}) => (
                             <div className="form-group">
-                                <label htmlFor="inputTitle">Title</label>
+                                <label htmlFor="inputTitle">{i18next.t(i18Keys.title)}</label>
                                 <input type="text"
                                        className={["form-control", meta.error && meta.touched && css["is-not-create"]].join(' ')}
                                        id="inputTitle" {...input}
-                                       placeholder="Enter title" required/>
+                                       placeholder={i18next.t(i18Keys.enterTitle)} required/>
                                 {meta.error && meta.touched &&
                                 <div className={css.invalid}>
                                     {meta.error}
@@ -56,11 +58,11 @@ export const TodoModal = (props: IProps) => (
                     <Field name="description">
                         {({input, meta}) => (
                             <div className="form-group">
-                                <label htmlFor="inputDescription">Description</label>
+                                <label htmlFor="inputDescription">{i18next.t(i18Keys.description)}</label>
                                 <input type="text"
                                        className={["form-control", meta.error && meta.touched && css["is-not-create"]].join(' ')}
                                        id="inputDescription" {...input}
-                                       placeholder="Description" required/>
+                                       placeholder={i18next.t(i18Keys.description)} required/>
                                 {meta.error && meta.touched &&
                                 <div className={css.invalid}>
                                     {meta.error}

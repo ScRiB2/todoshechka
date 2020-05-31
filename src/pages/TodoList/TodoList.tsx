@@ -9,6 +9,8 @@ import {connect, ConnectedProps} from "react-redux";
 import {APIErrorHandler, ResultStatusType} from "../../API/utils";
 import {NotificationManager} from 'react-notifications';
 import LoaderWithError from "../../components/LoaderWithError/LoaderWithError";
+import i18next from "i18next";
+import {i18Keys} from "../../i18n";
 
 interface IState {
     todos: TodoData[]
@@ -146,10 +148,10 @@ class TodoList extends React.Component<Props, IState> {
     validateForm = (values: TodoReqData) => {
         const errors: TodoReqData = {} as TodoReqData;
         if (!values.title) {
-            errors.title = 'Required'
+            errors.title = i18next.t(i18Keys.required)
         }
         if (!values.description) {
-            errors.description = 'Required'
+            errors.description = i18next.t(i18Keys.required)
         }
 
         return errors
@@ -159,7 +161,7 @@ class TodoList extends React.Component<Props, IState> {
         if (this.state.todos.length == 0)
             return (
                 <tr className={css.todo}>
-                    <td colSpan={5}>Not found...</td>
+                    <td colSpan={5}>{i18next.t(i18Keys.notFound)}...</td>
                 </tr>
             );
         return this.state.todos.map((todo, index) => (
@@ -191,15 +193,15 @@ class TodoList extends React.Component<Props, IState> {
             <LoaderWithError showLoader={this.state.showLoader} error={this.state.globalError}>
                 <>
                     <div>
-                        <h1 className={css.h1}>Todo List</h1>
+                        <h1 className={css.h1}>{i18next.t(i18Keys.todoList)}</h1>
                         <table className='table'>
                             <thead>
                             <tr className={css.todo} style={{color: 'white'}}>
                                 <th scope="col">#</th>
-                                <th scope="col">Title</th>
-                                <th scope="col">Description</th>
-                                <th scope="col">Created by</th>
-                                <th scope="col">Actions</th>
+                                <th scope="col">{i18next.t(i18Keys.title)}</th>
+                                <th scope="col">{i18next.t(i18Keys.description)}</th>
+                                <th scope="col">{i18next.t(i18Keys.createdBy)}</th>
+                                <th scope="col">{i18next.t(i18Keys.actions)}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -209,14 +211,14 @@ class TodoList extends React.Component<Props, IState> {
                         <button type="button" className="btn btn-dark pull-right"
                                 onClick={this.toggleShowCreationModal}
                         >
-                            Create new Todo
+                            {i18next.t(i18Keys.createNewTodo)}
                         </button>
                     </div>
                     {
                         this.state.showCreationModal
                         && <TodoModal
-                            header='Create Todo'
-                            buttonName='Create'
+                            header={i18next.t(i18Keys.createTodo)}
+                            buttonName={i18next.t(i18Keys.create)}
                             isAppealToApi={this.state.isAppealToApi}
                             error={this.state.error}
                             toggleShowModal={this.toggleShowCreationModal}
@@ -227,8 +229,8 @@ class TodoList extends React.Component<Props, IState> {
                     {
                         this.state.editModal.show
                         && <TodoModal
-                            header='Edit Todo'
-                            buttonName='Save'
+                            header={i18next.t(i18Keys.editTodo)}
+                            buttonName={i18next.t(i18Keys.save)}
                             title={this.state.editModal.title}
                             description={this.state.editModal.description}
                             isAppealToApi={this.state.isAppealToApi}

@@ -1,5 +1,7 @@
 import * as React from "react";
 import * as css from './ErrorBoundary.css'
+import i18next from "i18next";
+import {i18Keys} from "../../i18n";
 
 interface IState {
     hasError: boolean
@@ -27,7 +29,7 @@ export default class ErrorBoundary extends React.Component<any, IState> {
                             d="m295.988281 9.734375-286.613281 286.613281c-12.5 12.5-12.5 32.769532 0 45.25l15.082031 15.082032c12.503907 12.5 32.769531 12.5 45.25 0l286.632813-286.59375c12.503906-12.5 12.503906-32.765626 0-45.246094l-15.082032-15.082032c-12.5-12.523437-32.765624-12.523437-45.269531-.023437zm0 0"/>
                     </g>
                 </svg>
-                <div className={css.h1}>Something went wrong</div>
+                <div className={css.h1}>{i18next.t(i18Keys.somethingWentWrong)}</div>
             </>;
         }
 

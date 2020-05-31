@@ -1,17 +1,21 @@
 import * as React from "react";
 import {API} from "../../API/index";
 import * as css from "./TodoList.css";
-import {Loader} from "../../components/Loader/Loader";
 // @ts-ignore
 import {TodoData, TodoReqData} from "../../store/auth/types";
 import TodoModal from "./components/TodoModal";
 import {RootState} from "../../store/index";
 import {getUser} from "../../store/selectors";
 import {connect, ConnectedProps} from "react-redux";
+import {APIErrorHandler, ResultStatusType} from "../../API/utils";
+// @ts-ignore
+import {NotificationManager} from 'react-notifications';
+import LoaderWithError from "../../components/LoaderWithError/LoaderWithError";
 
 interface IState {
     todos: TodoData[]
     isAppealToApi: boolean
+    globalError: string
     error: string
     editModal: {
         show: boolean
@@ -19,6 +23,7 @@ interface IState {
         title: string
         description: string
     }
+    isDeleting: boolean
     showLoader: boolean
     showCreationModal: boolean
     showEditModal: boolean
@@ -38,8 +43,9 @@ type Props = PropsFromRedux;
 
 class TodoList extends React.Component<Props, IState> {
     state: IState = {
-        todos: null,
+        todos: [],
         isAppealToApi: false,
+        globalError: null,
         error: null,
         editModal: {
             show: false,
@@ -47,7 +53,8 @@ class TodoList extends React.Component<Props, IState> {
             title: null,
             description: null
         },
-        showLoader: true,
+        isDeleting: false,
+        showLoader: false,
         showCreationModal: false,
         showEditModal: false
     };
@@ -56,18 +63,45 @@ class TodoList extends React.Component<Props, IState> {
         this.updateTodos()
     }
 
+    toggleShowCreationModal = () => this.setState(prevState => ({
+        showCreationModal: !prevState.showCreationModal,
+        error: null
+    }));
+
+    toggleShowEditModal = () => this.setState(prevState => ({
+        editModal: {
+            ...prevState.editModal,
+            show: !prevState.editModal.show
+        }
+    }));
+
+    toggleIsAppealToApi = () => this.setState(prevState => ({isAppealToApi: !prevState.isAppealToApi}));
+    toggleShowLoader = (isShow?: boolean) => this.setState(prevState => ({showLoader: isShow ? isShow : !prevState.showLoader}));
+
     updateTodos = () => {
-        this.setState({showLoader: true});
+        this.toggleShowLoader(true);
         return API.getTodos().then(res => {
-            this.setState({showLoader: false, todos: res.data})
+            const result = APIErrorHandler(res);
+            if (!result) return;
+            this.toggleShowLoader(false);
+            if (result.status == ResultStatusType.SUCCESS) {
+                this.setState({todos: result.data})
+            } else this.setState({globalError: result.message})
         });
     };
 
     deleteTodo = (id: number) => {
+        this.toggleShowLoader();
         API.deleteTodo(id)
             .then(res => {
-                if (res.status == 204)
+                const result = APIErrorHandler(res);
+                if (!result) return;
+                if (result.status == ResultStatusType.SUCCESS) {
                     this.updateTodos()
+                } else {
+                    this.toggleShowLoader();
+                    NotificationManager.error(result.message)
+                }
             })
     };
 
@@ -81,64 +115,33 @@ class TodoList extends React.Component<Props, IState> {
         })
     };
 
-    renderTbody = () => {
-        return this.state.todos.map((todo, index) => (
-            <tr key={'tr' + index} className={css.todo}>
-                <th scope="row">{index + 1}</th>
-                <td>{todo.title}</td>
-                <td>{todo.description}</td>
-                <td>{todo.createdBy}</td>
-                <td>{
-                    this.props.user.role == 'admin' || todo.createdBy == this.props.user.role
-                        ? <>
-                            <button type="button" className="btn btn-dark"
-                                    onClick={() => this.editTodo(todo.id, todo.title, todo.description)}>
-                                <i className="fa fa-pencil" aria-hidden="true"/>
-                            </button>
-                            < button type="button" className="btn btn-dark" onClick={() => this.deleteTodo(todo.id)}>
-                                <i className="fa fa-trash-o" aria-hidden="true"/>
-                            </button>
-                        </>
-                        : null
-                }
-                </td>
-            </tr>
-        ))
-    };
-
-    checkTodo = (res: any) => {
-        this.setState({isAppealToApi: false});
-        if (res.status == 400) {
-            this.setState({error: res.data.message});
-            return false
-        }
-        if (res.status == 500) {
-            this.setState({error: res.statusText});
-            return false
-        }
-        this.setState({error: null});
-        return true
-    };
-
     onCreateTodo = (data: TodoReqData) => {
-        this.setState({isAppealToApi: true});
+        this.toggleIsAppealToApi();
         API.postTodo(data)
             .then(res => {
-                const flag = this.checkTodo(res);
-                if (flag)
-                this.updateTodos()
-                    .then(() => this.toggleShowCreationModal())
+                const result = APIErrorHandler(res);
+                if (!result) return;
+                this.toggleIsAppealToApi();
+                if (result.status == ResultStatusType.SUCCESS) {
+                    const todos = this.state.todos;
+                    todos.push(result.data);
+                    this.setState({todos});
+                    this.toggleShowCreationModal()
+                } else this.setState({error: result.message})
             })
     };
 
     onEditTodo = (data: TodoReqData) => {
-        this.setState({isAppealToApi: true});
+        this.toggleIsAppealToApi();
         API.putTodo(this.state.editModal.id, data)
             .then(res => {
-                const flag = this.checkTodo(res);
-                if (flag)
-                this.updateTodos()
-                    .then(() => this.toggleShowEditModal())
+                const result = APIErrorHandler(res);
+                if (!result) return;
+                this.toggleIsAppealToApi();
+                if (result.status == ResultStatusType.SUCCESS)
+                    this.updateTodos()
+                        .then(() => this.toggleShowEditModal());
+                else this.setState({error: result.message})
             })
     };
 
@@ -154,20 +157,41 @@ class TodoList extends React.Component<Props, IState> {
         return errors
     };
 
-    toggleShowCreationModal = () => this.setState(prevState => ({showCreationModal: !prevState.showCreationModal}));
-    toggleShowEditModal = () => this.setState(prevState => ({
-        editModal: {
-            ...prevState.editModal,
-            show: !prevState.editModal.show
-        }
-    }));
-
+    renderTbody = () => {
+        if (this.state.todos.length == 0)
+            return (
+                <tr className={css.todo}>
+                    <td colSpan={5}>Not found...</td>
+                </tr>
+            );
+        return this.state.todos.map((todo, index) => (
+            <tr key={'tr' + index} className={css.todo}>
+                <th scope="row">{index + 1}</th>
+                <td>{todo.title}</td>
+                <td>{todo.description}</td>
+                <td>{todo.createdBy}</td>
+                <td>{
+                    this.props.user.role == 'admin' || todo.createdBy == this.props.user.role
+                        ? <>
+                            <button type="button" className="btn btn-dark"
+                                    onClick={() => this.editTodo(todo.id, todo.title, todo.description)}>
+                                <i className="fa fa-pencil" aria-hidden="true"/>
+                            </button>
+                            <button type="button" className="btn btn-dark" onClick={() => this.deleteTodo(todo.id)}>
+                                <i className="fa fa-trash-o" aria-hidden="true"/>
+                            </button>
+                        </>
+                        : null
+                }
+                </td>
+            </tr>
+        ))
+    };
 
     render() {
         return (
-            this.state.showLoader
-                ? <Loader/>
-                : <>
+            <LoaderWithError showLoader={this.state.showLoader} error={this.state.globalError}>
+                <>
                     <div>
                         <h1 className={css.h1}>Todo List</h1>
                         <table className='table'>
@@ -217,6 +241,7 @@ class TodoList extends React.Component<Props, IState> {
                         />
                     }
                 </>
+            </LoaderWithError>
         )
     }
 }

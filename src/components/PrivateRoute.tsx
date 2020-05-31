@@ -1,6 +1,6 @@
-import {Route, Redirect} from "react-router-dom";
+import {Route} from "react-router-dom";
 import * as React from "react";
-import {AccessForbidden} from "../pages/AccessForbidden/AccessForbidden";
+import {Whistle} from "./Whistle/Whistle";
 
 export function PrivateRoute({component: Component, user, ...rest}) {
     return (
@@ -8,7 +8,7 @@ export function PrivateRoute({component: Component, user, ...rest}) {
             {...rest}
             render={(props) => user.role === 'admin'
                 ? <Component {...props} />
-                : <AccessForbidden/>
+                : <Whistle errorNumber={403} errorText='Not this time, access forbidden!'/>
             }
         />
     )

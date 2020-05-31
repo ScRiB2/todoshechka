@@ -1,6 +1,6 @@
 // @ts-ignore
 import {Field, Form} from "react-final-form";
-import {ErrorHandler} from "../../../components/ErrorHandler/ErrorHandler";
+import {MiniErrorHandler} from "../../../components/MiniErrorHandler/MiniErrorHandler";
 import * as css from "../TodoList.css";
 import {Modal} from "../../../components/Modal/Modal";
 import * as React from "react";
@@ -34,7 +34,7 @@ export const TodoModal = (props: IProps) => (
                 <form id='todoForm' onSubmit={handleSubmit}>
                     {
                         props.error
-                            ? <ErrorHandler errorText={props.error}/>
+                            ? <MiniErrorHandler errorText={props.error}/>
                             : null
                     }
                     <Field name="title">

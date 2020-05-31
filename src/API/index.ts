@@ -9,7 +9,7 @@ import {putTodo} from "./methods/todos/putTodo";
 import {getTodo} from "./methods/todos/getTodo";
 import {TodoReqData, UserAuthData} from "../store/auth/types";
 
-export class  API {
+export class API {
     public static postLogin = (data: UserAuthData) => postLogin(data);
     public static postLogout = () => postLogout();
     public static getMe = () => getMe();

@@ -1,40 +1,40 @@
 import {API} from "../../API/index";
 import {AuthActionTypes, LOGIN_ERROR, LOGIN_SUCCESS, LOGOUT, UserAuthData, UserData} from "./types";
 import {AppThunk} from "../index";
+import {APIErrorHandler, ResultStatusType} from "../../API/utils";
 
 export function login(authData: UserAuthData): AppThunk {
     return async dispatch => {
-        const response = await API.postLogin(authData);
-        if (response) {
-            if (response.status == 200)
-                dispatch(loginSuccess(response.data));
-            else if (response.status == 400)
-                dispatch(loginError(response.data.message));
-            else dispatch(loginError(response.statusText))
-
-        } else {
-            dispatch(loginError(response.statusText))
-        }
+        const res = await API.postLogin(authData);
+        const result = APIErrorHandler(res);
+        if (!result) return;
+        if (result.status == ResultStatusType.SUCCESS) {
+            dispatch(loginSuccess(result.data))
+        } else return dispatch(loginError(result.message));
     }
 }
 
 export function auth(): AppThunk {
     return async dispatch => {
         const res = await API.getMe();
-        if (res && res.status == 200) {
-            dispatch(loginSuccess(res.data));
-        } else if (res.status == 500) return res.statusText
+        const result = APIErrorHandler(res);
+        if (!result) return;
+        if (result.status == ResultStatusType.SUCCESS) {
+            dispatch(loginSuccess(result.data));
+        } else return result.message
     }
 }
 
 export function logout() {
     return async dispatch => {
         const res = await API.postLogout();
-        if (res && res.status == 200) {
+        const result = APIErrorHandler(res);
+        if (!result) return;
+        if (result.status == ResultStatusType.SUCCESS || result.message == 'Bad Request') {
             dispatch({
                 type: LOGOUT
             });
-        } else if (res.status == 500) return res.statusText
+        } else return result.message;
     }
 }
 

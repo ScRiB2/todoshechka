@@ -1,7 +1,7 @@
 import * as React from "react";
-import * as css from './AccessForbidden.css'
+import * as css from './Whistle.css'
 
-export const AccessForbidden = () => (
+export const Whistle = ({errorNumber, errorText}: { errorNumber: string | number, errorText: string }) => (
     <>
         <svg version="1.1" x="0px" y="0px"
              viewBox="0 0 1000 1000" enableBackground="new 0 0 1000 1000" xmlSpace="preserve" className={css.whistle}>
@@ -16,7 +16,7 @@ export const AccessForbidden = () => (
                 </g>
             </g>
         </svg>
-        <h1 className={css.h1}>403</h1>
-        <h2 className={css.h2}>Not this time, access forbidden!</h2>
+        <h1 className={css.h1}>{errorNumber}</h1>
+        <h2 className={css.h2}>{errorText}</h2>
     </>
 );

@@ -7,7 +7,7 @@ interface IProps {
 }
 
 const Main = (props: IProps) => (
-        <h1 className={css.h1}>Welcome, {props.user.name}</h1>
+    <h1 className={css.h1}>Welcome, {props.user.name}</h1>
 );
 
 export default Main;

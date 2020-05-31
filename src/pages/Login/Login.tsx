@@ -9,7 +9,7 @@ import {RootState} from "../../store/index";
 import {siteKey} from "../../env/env";
 // @ts-ignore
 import ReCAPTCHA from 'react-google-recaptcha'
-import {ErrorHandler} from "../../components/ErrorHandler/ErrorHandler";
+import {MiniErrorHandler} from "../../components/MiniErrorHandler/MiniErrorHandler";
 import {getError} from "../../store/selectors";
 
 
@@ -85,7 +85,7 @@ class Login extends React.Component<Props, IState> {
                             <form id='loginForm' onSubmit={handleSubmit}>
                                 {
                                     this.props.authError
-                                        ? <ErrorHandler errorText={this.props.authError}/>
+                                        ? <MiniErrorHandler errorText={this.props.authError}/>
                                         : null
                                 }
                                 <Field name="login">

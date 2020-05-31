@@ -18,7 +18,7 @@ export interface TodoReqData {
     description: string
 }
 
-export interface TodoData extends TodoReqData{
+export interface TodoData extends TodoReqData {
     id: number
     createdBy: string
 }

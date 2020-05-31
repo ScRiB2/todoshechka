@@ -14,7 +14,6 @@ import TodoList from "./TodoList/TodoList";
 import ErrorBoundary from "../components/ErrorBoundary/ErrorBundary";
 import Users from "./Users/Users";
 import {Whistle} from "../components/Whistle/Whistle";
-//@ts-ignore
 import {NotificationContainer} from 'react-notifications';
 import LoaderWithError from "../components/LoaderWithError/LoaderWithError";
 

@@ -1,13 +1,11 @@
 import * as React from "react";
 import * as css from "./Login.css"
-// @ts-ignore
 import {Field, Form} from 'react-final-form'
 import {login} from "../../store/auth/actions";
 import {connect, ConnectedProps} from "react-redux";
 import {UserAuthData} from "../../store/auth/types";
 import {RootState} from "../../store/index";
 import {siteKey} from "../../env/env";
-// @ts-ignore
 import ReCAPTCHA from 'react-google-recaptcha'
 import {MiniErrorHandler} from "../../components/MiniErrorHandler/MiniErrorHandler";
 import {getError} from "../../store/selectors";

@@ -1,7 +1,5 @@
-// @ts-ignore
 import {Action, combineReducers} from "redux";
 import authReducer from "./auth/reducers";
-// @ts-ignore
 import {ThunkAction} from "redux-thunk";
 
 const rootReducer = combineReducers({

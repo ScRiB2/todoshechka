@@ -1,4 +1,3 @@
-// @ts-ignore
 import {Field, Form} from "react-final-form";
 import {MiniErrorHandler} from "../../../components/MiniErrorHandler/MiniErrorHandler";
 import * as css from "../TodoList.css";

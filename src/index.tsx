@@ -2,12 +2,11 @@ import * as React from 'react';
 import {render} from 'react-dom';
 import App from "./pages/index";
 import {BrowserRouter} from "react-router-dom";
-// @ts-ignore
 import {applyMiddleware, compose, createStore} from "redux";
 import {Provider} from "react-redux";
-// @ts-ignore
 import thunk from 'redux-thunk'
 import rootReducer from "./store/index";
+import './i18n';
 
 declare global {
     interface Window {

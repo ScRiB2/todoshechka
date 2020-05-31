@@ -1,4 +1,3 @@
-// @ts-ignore
 import axios from "axios";
 import {apiBaseUrl} from "../../env/env";
 

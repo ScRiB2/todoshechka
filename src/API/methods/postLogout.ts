@@ -1,5 +1,4 @@
 import {apiBaseUrl} from "../../env/env";
-// @ts-ignore
 import axios from 'axios';
 
 export const postLogout = () => {

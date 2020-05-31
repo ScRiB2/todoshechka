@@ -1,4 +1,3 @@
-// @ts-ignore
 import axios from 'axios';
 import {TodoReqData} from "../../../store/auth/types";
 import {apiBaseUrl} from "../../../env/env";

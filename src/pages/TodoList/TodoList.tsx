@@ -1,14 +1,12 @@
 import * as React from "react";
 import {API} from "../../API/index";
 import * as css from "./TodoList.css";
-// @ts-ignore
 import {TodoData, TodoReqData} from "../../store/auth/types";
 import TodoModal from "./components/TodoModal";
 import {RootState} from "../../store/index";
 import {getUser} from "../../store/selectors";
 import {connect, ConnectedProps} from "react-redux";
 import {APIErrorHandler, ResultStatusType} from "../../API/utils";
-// @ts-ignore
 import {NotificationManager} from 'react-notifications';
 import LoaderWithError from "../../components/LoaderWithError/LoaderWithError";
 

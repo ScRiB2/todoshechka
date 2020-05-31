@@ -5,7 +5,6 @@ import {logout} from "../../store/auth/actions";
 import {connect, ConnectedProps} from "react-redux";
 import {RootState} from "../../store/index";
 import {Link} from "react-router-dom";
-// @ts-ignore
 import {NotificationManager} from 'react-notifications';
 
 interface IProps {
@@ -29,7 +28,6 @@ type Props = PropsFromRedux
 async function onClick(e, props: Props) {
     e.preventDefault();
     const error = await props.logout();
-    console.log(error)
     if (error)
         NotificationManager.error(error)
 }

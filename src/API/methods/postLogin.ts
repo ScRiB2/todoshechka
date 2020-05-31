@@ -1,5 +1,4 @@
 import {apiBaseUrl} from "../../env/env";
-// @ts-ignore
 import axios from 'axios';
 import {UserAuthData} from "../../store/auth/types";
 

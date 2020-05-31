@@ -1,4 +1,5 @@
 import * as React from "react";
+import {useState} from "react";
 import * as css from './Header.css'
 import {UserData} from "../../store/auth/types";
 import {logout} from "../../store/auth/actions";
@@ -24,9 +25,11 @@ type PropsFromRedux = ConnectedProps<typeof connector>
 
 type Props = PropsFromRedux & IProps
 
-async function onClick(e, props: Props) {
+async function onClick(e, props: Props, setIsAppeal) {
     e.preventDefault();
+    setIsAppeal(true);
     const error = await props.logout();
+    setIsAppeal(false);
     if (error)
         NotificationManager.error(error)
 }
@@ -37,34 +40,45 @@ const onChangeLanguage = async (e: React.ChangeEvent<HTMLSelectElement>, update)
     update()
 };
 
-const Header = (props: Props) => (
-    <header className={css.header}>
-        <div className={['container', css["header-container"]].join(' ')}>
-            <div className={css.left}>
-                <Link to='/' style={{textDecoration: 'none'}}>Todoshechka</Link>
-            </div>
-            <div>
-                <select defaultValue={i18next.language} className="custom-select" style={{marginRight: 10}}
-                        onChange={(e) => onChangeLanguage(e, props.update)}>
-                    <option value="en">English</option>
-                    <option value="ru-RU">Русский</option>
-                </select>
-            </div>
-            <div className={css.right}>
-                {
-                    props.user.role == 'admin' && <div>
-                        <Link to={'/users'} style={{textDecoration: 'none'}}>{i18next.t(i18Keys.users)}</Link>
-                    </div>
-                }
-                <div className={css.username}>
-                    <Link to='/todos' style={{textDecoration: 'none', color: '#facf5a'}}>{props.user.name}</Link>
+const Header = (props: Props) => {
+    const [isAppeal, setIsAppeal] = useState(false);
+    return (
+        <header className={css.header}>
+            <div className={['container', css["header-container"]].join(' ')}>
+                <div className={css.left}>
+                    <Link to='/' style={{textDecoration: 'none'}}>Todoshechka</Link>
                 </div>
-                <a href='/logout' style={{textDecoration: 'none'}}
-                   onClick={(e) => onClick(e, props)}>{i18next.t(i18Keys.logout)}</a>
-            </div>
+                <div>
+                    <select defaultValue={i18next.language} className="custom-select" style={{marginRight: 10}}
+                            onChange={(e) => onChangeLanguage(e, props.update)}>
+                        <option value="en">English</option>
+                        <option value="ru-RU">Русский</option>
+                    </select>
+                </div>
+                <div className={css.right}>
 
-        </div>
-    </header>
-);
+                    {
+                        props.user.role == 'admin' && <div>
+                            <Link to={'/users'} style={{textDecoration: 'none'}}>{i18next.t(i18Keys.users)}</Link>
+                        </div>
+                    }
+
+                    <div className={css.username}>
+                        <Link to='/todos' style={{textDecoration: 'none', color: '#facf5a'}}>{props.user.name}</Link>
+                    </div>
+
+                    <a href='/logout' style={{textDecoration: 'none'}}
+                       className={isAppeal ? css.isNotClickable : null}
+                       onClick={(e) => onClick(e, props, setIsAppeal)}
+                    >
+                        {!isAppeal ? i18next.t(i18Keys.logout) : i18next.t(i18Keys.logout) + '...'}
+                    </a>
+
+                </div>
+
+            </div>
+        </header>
+    )
+};
 
 export default connector(Header);
